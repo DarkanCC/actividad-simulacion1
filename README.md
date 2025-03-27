@@ -23,7 +23,9 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    
    <details>
    <summary>Answer</summary>
+
    If we only use the flags `-l 5:100,5:100` the output will be like this:
+
    ```
    Process 0
      cpu
@@ -43,6 +45,7 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    We know that the CPU is beign used a 100% of the time because the number 100 in the flag indicates that each one of the 5 instructions that the process is going to execute, have a 100% of chances to use the CPU, and when the CPU finishes running all the instructions of process 0, it will immediately start running instructions of the process 1.
    
    To confirm this, we use the flags `-l 5:100,5:100 -c -p` to see all the details like this:
+
    ```
    Time        PID: 0        PID: 1           CPU           IOs
      1        RUN:cpu         READY             1          
@@ -60,6 +63,7 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    Stats: CPU Busy 10 (100.00%)
    Stats: IO Busy  0 (0.00%)
    ```
+
    </details>
    <br>
 
@@ -67,7 +71,9 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    
    <details>
    <summary>Answer</summary>
+
    When we run the program, we'll get this output:
+
    ```
    Process 0
      cpu
@@ -81,11 +87,13 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    ```
 
    If you readed the documentation of `process.run.py`, you will know that every I/O operation takes 5 units of time (as default) to be done, and also when a process runs an I/O, the CPU uses 2 units of time, 1 for starting the I/O and 1 for finishing it. With all of this beign said, the total ammount of time used to complete both processes is 11 and is distributed like this:
+
    - 4 times to execute all 4 instructions of the first process.
    - 2 times to start and finish the I/O operation of the second process.
    - 5 times waiting for the I/O operation to finish (BLOCKED STATE).
 
    To check this answer, we run the flags `-l 4:100,1:0 -c -p` and get this:
+
    ```
    Time        PID: 0        PID: 1           CPU           IOs
      1        RUN:cpu         READY             1          
@@ -104,6 +112,7 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    Stats: CPU Busy 6 (54.55%)
    Stats: IO Busy  5 (45.45%)
    ```
+
    </details>
    <br>
 
@@ -111,7 +120,9 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    
    <details>
    <summary>Answer</summary>
+
    If we switch orders we get this:
+
    ```
    Process 0
      io
@@ -125,11 +136,13 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    ```
 
    Just like in the previous question, if you haven't read the documentation you will not know that the system is configured to switch between processes when the current process finishes or issues an I/O. Knowing this, the ammount of time used to finish is 7, and is distributed like this:
+
    - 2 times to start and finish the I/O.
    - 4 times to execute the instructions of the second process while the first process is BLOCKED for 5 times. They are beign executed simultaneously, one by the CPU and the other by the IOs.
    - 1 time remaining of process 0 beign BLOCKED.
 
    This way we are not only finshing process in less time, but we are also making a better use of our resources. The details are these:
+
    ```
    Time        PID: 0        PID: 1           CPU           IOs
      1         RUN:io         READY             1          
@@ -144,6 +157,7 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    Stats: CPU Busy 6 (85.71%)
    Stats: IO Busy  5 (71.43%)
    ```
+
    </details>
    <br>
 
@@ -151,7 +165,9 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    
    <details>
    <summary>Answer</summary>
+
    When we run the program wit the flag `-l 1:0,4:100 -c -S SWITCH_ON_END`, we get this:
+
    ```
    Time        PID: 0        PID: 1           CPU           IOs
      1         RUN:io         READY             1          
@@ -168,6 +184,7 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    ```
 
    We can see that we are not optimizing the use of our resources, because while process 0 is BLOCKED, the CPU is not doing anything while it could be executing instructions of process 1 which is READY.
+
    </details>
    <br>
 
