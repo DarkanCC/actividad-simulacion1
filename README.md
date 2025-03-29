@@ -63,7 +63,6 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    Stats: CPU Busy 10 (100.00%)
    Stats: IO Busy  0 (0.00%)
    ```
-
    </details>
    <br>
 
@@ -192,7 +191,27 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    
    <details>
    <summary>Answer</summary>
-   Coloque aqui su respuerta
+   When we run the program with the given flags, we can intuit that when *process 0* starts the IO operation, the CPU will immediately start executing instructions of *process 1*, so the time is divided like this:
+
+   - 2 times to start and finish the I/O of *process 0*.
+   - 4 times to execute instructions of *process 1* while *process 0* is BLOCKED.
+   - 1 time for *process 0* to exit BLOCKED state.
+
+   The program shows this:
+
+   ```
+   Time        PID: 0        PID: 1           CPU           IOs
+     1         RUN:io         READY             1
+     2        BLOCKED       RUN:cpu             1             1
+     3        BLOCKED       RUN:cpu             1             1
+     4        BLOCKED       RUN:cpu             1             1
+     5        BLOCKED       RUN:cpu             1             1
+     6        BLOCKED          DONE                           1
+     7*   RUN:io_done          DONE             1
+   ```
+
+   With these flags, we make a better use of our resources, with same processes, but changing the way CPU switches between processes.
+
    </details>
    <br>
 
@@ -200,7 +219,50 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    
    <details>
    <summary>Answer</summary>
-   Coloque aqui su respuerta
+   When we run the program with the given flags, the *process 0* starts executing and immediately issues an I/O, goes to the end of the QUEUE of processes because of the flag `-I IO_RUN_LATER` and the CPU switches to the next process in the QUEUE. The *process 0* is now the last process to be executed by CPU.
+
+   With all of this info we can intuit that the total ammount of time to end the execution of the program will be like this:
+
+   - 6 times to start and finish all 3 I/O issues from *process 0*.
+   - 15 times to execute all instructions from the other processes (5 for each).
+   - 10 times while *process 0* is BLOCKED. The other 5 times while it was blocked the CPU and IOs were working simultaneously because of the flag `-S SWITCH_ON_IO`.
+
+   That gives us a total ammount of 31 times. The output when doing this is:
+
+   ```
+   Time        PID: 0        PID: 1        PID: 2        PID: 3           CPU           IOs
+     1         RUN:io         READY         READY         READY             1
+     2        BLOCKED       RUN:cpu         READY         READY             1             1
+     3        BLOCKED       RUN:cpu         READY         READY             1             1
+     4        BLOCKED       RUN:cpu         READY         READY             1             1
+     5        BLOCKED       RUN:cpu         READY         READY             1             1
+     6        BLOCKED       RUN:cpu         READY         READY             1             1
+     7*         READY          DONE       RUN:cpu         READY             1
+     8          READY          DONE       RUN:cpu         READY             1
+     9          READY          DONE       RUN:cpu         READY             1
+    10          READY          DONE       RUN:cpu         READY             1
+    11          READY          DONE       RUN:cpu         READY             1
+    12          READY          DONE          DONE       RUN:cpu             1
+    13          READY          DONE          DONE       RUN:cpu             1
+    14          READY          DONE          DONE       RUN:cpu             1
+    15          READY          DONE          DONE       RUN:cpu             1
+    16          READY          DONE          DONE       RUN:cpu             1
+    17    RUN:io_done          DONE          DONE          DONE             1
+    18         RUN:io          DONE          DONE          DONE             1
+    19        BLOCKED          DONE          DONE          DONE                           1
+    20        BLOCKED          DONE          DONE          DONE                           1
+    21        BLOCKED          DONE          DONE          DONE                           1
+    22        BLOCKED          DONE          DONE          DONE                           1
+    23        BLOCKED          DONE          DONE          DONE                           1
+    24*   RUN:io_done          DONE          DONE          DONE             1
+    25         RUN:io          DONE          DONE          DONE             1
+    26        BLOCKED          DONE          DONE          DONE                           1
+    27        BLOCKED          DONE          DONE          DONE                           1
+    28        BLOCKED          DONE          DONE          DONE                           1
+    29        BLOCKED          DONE          DONE          DONE                           1
+    30        BLOCKED          DONE          DONE          DONE                           1
+    31*   RUN:io_done          DONE          DONE          DONE             1
+   ```
    </details>
    <br>
 
@@ -208,11 +270,32 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    
    <details>
    <summary>Answer</summary>
-   Coloque aqui su respuerta
+   With this configuration, the resources will be more effectively used, because while the *process 0* is BLOCKED in all of its 3 I/O issues, the CPU will switch to another process. This is, when *process 0* exits each I/O issue, the CPU will switch again to *process 0*, start another I/O issue and switch again to another process, over and over again until every process is DONE. The output is something like this:
+
+   ```
+   Time        PID: 0        PID: 1        PID: 2        PID: 3           CPU           IOs
+     1         RUN:io         READY         READY         READY             1
+     2        BLOCKED       RUN:cpu         READY         READY             1             1
+     3        BLOCKED       RUN:cpu         READY         READY             1             1
+     4        BLOCKED       RUN:cpu         READY         READY             1             1
+     5        BLOCKED       RUN:cpu         READY         READY             1             1
+     6        BLOCKED       RUN:cpu         READY         READY             1             1
+     7*   RUN:io_done          DONE         READY         READY             1
+     8         RUN:io          DONE         READY         READY             1
+     9        BLOCKED          DONE       RUN:cpu         READY             1             1
+    10        BLOCKED          DONE       RUN:cpu         READY             1             1
+    11        BLOCKED          DONE       RUN:cpu         READY             1             1
+    12        BLOCKED          DONE       RUN:cpu         READY             1             1
+    13        BLOCKED          DONE       RUN:cpu         READY             1             1
+    14*   RUN:io_done          DONE          DONE         READY             1
+    15         RUN:io          DONE          DONE         READY             1
+    16        BLOCKED          DONE          DONE       RUN:cpu             1             1
+    17        BLOCKED          DONE          DONE       RUN:cpu             1             1
+    18        BLOCKED          DONE          DONE       RUN:cpu             1             1
+    19        BLOCKED          DONE          DONE       RUN:cpu             1             1
+    20        BLOCKED          DONE          DONE       RUN:cpu             1             1
+    21*   RUN:io_done          DONE          DONE          DONE             1
+   ```
+
    </details>
    <br>
-
-
-### Criterios de evaluación
-- [x] Despligue de los resultados y analisis claro de los resultados respecto a lo visto en la teoria.
-- [x] Creatividad y orden.
