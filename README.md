@@ -42,7 +42,7 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
      cpu
    ```
    
-   We know that the CPU is beign used a 100% of the time because the number 100 in the flag indicates that each one of the 5 instructions that the process is going to execute, have a 100% of chances to use the CPU, and when the CPU finishes running all the instructions of process 0, it will immediately start running instructions of the process 1.
+   We know that the CPU is beign used a 100% of the time because the number 100 in the flag indicates that each one of the 5 instructions that the process is going to execute, have a 100% of chances to use the CPU, and when the CPU finishes running all the instructions of *process 0*, it will immediately start running instructions of the *process 1*.
    
    To confirm this, we use the flags `-l 5:100,5:100 -c -p` to see all the details like this:
 
@@ -136,11 +136,11 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
 
    Just like in the previous question, if you haven't read the documentation you will not know that the system is configured to switch between processes when the current process finishes or issues an I/O. Knowing this, the ammount of time used to finish is 7, and is distributed like this:
 
-   - 2 times to start and finish the I/O.
-   - 4 times to execute the instructions of the second process while the first process is BLOCKED for 5 times. They are beign executed simultaneously, one by the CPU and the other by the IOs.
-   - 1 time remaining of process 0 beign BLOCKED.
+   - 2 times to start and finish the I/O for *process 0*.
+   - 4 times to execute the instructions of the *process 1* while *process 0* is BLOCKED for 5 times. They are beign executed simultaneously, one by the CPU and the other by the IOs.
+   - 1 time remaining of *process 0* beign BLOCKED.
 
-   This way we are not only finshing process in less time, but we are also making a better use of our resources. The details are these:
+   This way we are not only executing processes in less time, but we are also making a better use of our resources. The details are these:
 
    ```
    Time        PID: 0        PID: 1           CPU           IOs
@@ -182,7 +182,7 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
     11           DONE       RUN:cpu             1 
    ```
 
-   We can see that we are not optimizing the use of our resources, because while process 0 is BLOCKED, the CPU is not doing anything while it could be executing instructions of process 1 which is READY.
+   We can see that we are not optimizing the use of our resources, because while *process 0* is BLOCKED, the CPU is not doing anything while it could be executing instructions of *process 1* which is READY.
 
    </details>
    <br>
@@ -191,6 +191,7 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    
    <details>
    <summary>Answer</summary>
+
    When we run the program with the given flags, we can intuit that when *process 0* starts the IO operation, the CPU will immediately start executing instructions of *process 1*, so the time is divided like this:
 
    - 2 times to start and finish the I/O of *process 0*.
@@ -219,6 +220,7 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    
    <details>
    <summary>Answer</summary>
+
    When we run the program with the given flags, the *process 0* starts executing and immediately issues an I/O, goes to the end of the QUEUE of processes because of the flag `-I IO_RUN_LATER` and the CPU switches to the next process in the QUEUE. The *process 0* is now the last process to be executed by CPU.
 
    With all of this info we can intuit that the total ammount of time to end the execution of the program will be like this:
@@ -270,6 +272,7 @@ This program, [`process-run.py`](process-run.py), allows you to see how process 
    
    <details>
    <summary>Answer</summary>
+
    With this configuration, the resources will be more effectively used, because while the *process 0* is BLOCKED in all of its 3 I/O issues, the CPU will switch to another process. This is, when *process 0* exits each I/O issue, the CPU will switch again to *process 0*, start another I/O issue and switch again to another process, over and over again until every process is DONE. The output is something like this:
 
    ```
